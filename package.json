@@ -1,0 +1,23 @@
+{
+  "name": "faf-server-card-ref",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference MCP Server Card carrying FAF context in _meta — validated against MCP's own schema, served live on Cloudflare Workers.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:brake": "node --test test/brake.test.mjs",
+    "test:engine": "node --test test/engine.test.mjs",
+    "test:aero": "node --test test/aero.test.mjs",
+    "test:tyres": "node --test test/tyres.test.mjs",
+    "snapshot": "node scripts/snapshot.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "wrangler": "^4.0.0"
+  }
+}

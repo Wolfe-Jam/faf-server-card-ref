@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "faf-server-card-ref",
+  "main": "src/index.js",
+  "compatibility_date": "2026-06-01",
+  "observability": { "enabled": true }
+  // Deploy:  npm run deploy
+  // Then bind a route, e.g. card.faf.one/*  (the card derives its own host)
+}

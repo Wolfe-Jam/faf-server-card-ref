@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "one.faf/context",
+  "version": "1.0.0",
+  "description": "Reference MCP Server Card carrying FAF context in _meta - the C in MCP, with receipts.",
+  "title": "FAF Context Endpoint",
+  "websiteUrl": "https://faf.one",
+  "repository": {
+    "url": "https://github.com/Wolfe-Jam/faf-cli",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://card.faf.one/mcp",
+      "supportedProtocolVersions": [
+        "2025-11-25"
+      ]
+    }
+  ],
+  "_meta": {
+    "one.faf/context": {
+      "faf": "https://faf.one/.well-known/project.faf",
+      "mediaType": "application/vnd.faf+yaml",
+      "iana": "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
+      "deterministic": true,
+      "scoreEndpoint": "https://faf.one",
+      "generated": "2026-06-08T00:00:00Z"
+    }
+  }
+}
