@@ -3,8 +3,8 @@
  *
  * Builds an MCP Server Card (SEP-2127 / experimental-ext-server-card) that
  * carries FAF context in the reverse-DNS `_meta` slot. The card validates
- * against MCP's OWN published schema (see test/validate.mjs) — conformance is
- * proven, not asserted.
+ * against MCP's OWN published schema (see the WJTTC suite in test/) — conformance
+ * is proven, not asserted.
  *
  * Design notes (deliberate, per FAF doctrine):
  *  - We do NOT bake a score number into the card. The score is deterministic
