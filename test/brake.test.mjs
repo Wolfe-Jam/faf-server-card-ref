@@ -1,5 +1,5 @@
 /**
- * 🛡️ BRAKE — must-never-fail. If any of these go red, the artifact lies.
+ * BRAKE — must-never-fail. If any of these go red, the artifact lies.
  * Schema conformance · card↔runtime parity · honest-first · don't-lie · IANA exactness.
  */
 import { test } from "node:test";
@@ -20,27 +20,27 @@ import {
 } from "./_helpers.mjs";
 import { PROJECT_FAF } from "../src/projectfaf.js";
 
-test("🛡️ _meta.faf is self-hosted (host-derived) — resolves on this origin", async () => {
+test("Brake · _meta.faf is self-hosted (host-derived) — resolves on this origin", async () => {
   const ctx = (await card("ctx.example"))._meta["one.faf/context"];
   assert.equal(ctx.faf, "https://ctx.example/.well-known/project.faf");
 });
 
-test("🛡️ PROJECT_FAF (served) === the committed project.faf (no drift)", () => {
+test("Brake · PROJECT_FAF (served) === the committed project.faf (no drift)", () => {
   assert.equal(PROJECT_FAF, readFileSync(join(ROOT, "project.faf"), "utf8"));
 });
 
 const validate = serverCardValidator();
 
-test("🛡️ static card conforms to MCP's own schema (2020-12)", () => {
+test("Brake · static card conforms to MCP's own schema (2020-12)", () => {
   const c = buildServerCard("context.faf.one", "2026-06-08T00:00:00Z");
   assert.ok(validate(c), JSON.stringify(validate.errors, null, 2));
 });
 
-test("🛡️ served card conforms (live handler output)", async () => {
+test("Brake · served card conforms (live handler output)", async () => {
   assert.ok(validate(await card()), JSON.stringify(validate.errors, null, 2));
 });
 
-test("🛡️ card↔runtime _meta parity (SEP-2127 #23)", async () => {
+test("Brake · card↔runtime _meta parity (SEP-2127 #23)", async () => {
   const fromCard = (await card())._meta["one.faf/context"];
   const fromRuntime = (await init({ protocolVersion: PROTO })).result._meta[
     "one.faf/context"
@@ -53,7 +53,7 @@ test("🛡️ card↔runtime _meta parity (SEP-2127 #23)", async () => {
   );
 });
 
-test("🛡️ honest-first: every advertised protocol is actually answered", async () => {
+test("Brake · honest-first: every advertised protocol is actually answered", async () => {
   const advertised = (await card()).remotes[0].supportedProtocolVersions;
   assert.ok(advertised.length > 0);
   for (const v of advertised) {
@@ -62,7 +62,7 @@ test("🛡️ honest-first: every advertised protocol is actually answered", asy
   }
 });
 
-test("🛡️ FAF don't lie: no baked score or tier, computation is linked", async () => {
+test("Brake · FAF don't lie: no baked score or tier, computation is linked", async () => {
   const ctx = (await card())._meta["one.faf/context"];
   assert.equal(ctx.score, undefined, "must not bake a score number");
   assert.equal(ctx.tier, undefined, "must not bake a tier");
@@ -70,12 +70,12 @@ test("🛡️ FAF don't lie: no baked score or tier, computation is linked", asy
   assert.equal(typeof ctx.scoreEndpoint, "string");
 });
 
-test("🛡️ IANA media type is exact", async () => {
+test("Brake · IANA media type is exact", async () => {
   const ctx = (await card())._meta["one.faf/context"];
   assert.equal(ctx.mediaType, MEDIA_TYPE);
 });
 
-test("🛡️ identity fields are static — never reflect request input", async () => {
+test("Brake · identity fields are static — never reflect request input", async () => {
   const a = await card("a.example");
   const b = await card("b.example");
   assert.equal(a.name, b.name, "name must be constant");
@@ -84,7 +84,7 @@ test("🛡️ identity fields are static — never reflect request input", async
 });
 
 // Layer 2 expert edges — break it on purpose
-test("🛡️ malformed JSON → -32700, never a 500", async () => {
+test("Brake · malformed JSON → -32700, never a 500", async () => {
   const res = await call("/mcp", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -94,7 +94,7 @@ test("🛡️ malformed JSON → -32700, never a 500", async () => {
   assert.equal(body.error.code, -32700);
 });
 
-test("🛡️ empty body → parse error, not a crash", async () => {
+test("Brake · empty body → parse error, not a crash", async () => {
   const res = await call("/mcp", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -104,7 +104,7 @@ test("🛡️ empty body → parse error, not a crash", async () => {
   assert.equal((await res.json()).error.code, -32700);
 });
 
-test("🛡️ unicode/emoji protocolVersion → safe fallback, no throw", async () => {
+test("Brake · unicode/emoji protocolVersion → safe fallback, no throw", async () => {
   const r = await init({ protocolVersion: "🏎️-not-a-version" });
   assert.equal(r.result.protocolVersion, PROTO);
 });

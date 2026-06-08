@@ -16,7 +16,7 @@ This is a **show-the-flow** artifact, not a pitch. It demonstrates — with rece
 
 ```bash
 npm install
-npm test          # WJTTC: 🛡️ Brake · ⚙️ Engine · 🌀 Aero · 🛞 Tyres
+npm test          # WJTTC: Brake · Engine · Aero · Tyres
 ```
 
 The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes) grey-skip unless `WJTTC_TARGET` is set.
@@ -43,7 +43,7 @@ curl -s https://context.faf.one/mcp -H 'content-type: application/json' \
 ```jsonc
 "_meta": {
   "one.faf/context": {
-    "faf": "https://faf.one/.well-known/project.faf",   // pointer to the IANA-registered artifact
+    "faf": "https://context.faf.one/.well-known/project.faf",  // self-hosted pointer to the .faf context (host-derived)
     "mediaType": "application/vnd.faf+yaml",             // IANA-registered media type
     "iana": "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
     "deterministic": true,                               // the score is mechanical + reproducible
@@ -62,10 +62,12 @@ curl -s https://context.faf.one/mcp -H 'content-type: application/json' \
 ## Layout
 
 ```
-src/card.js          single source of truth for the card + FAF context
-src/index.js         the Worker (card + minimal MCP + landing page)
+src/card.js          card + catalog + the FAF context block (source of truth)
+src/index.js         the Worker (catalog + card + minimal MCP + landing)
+src/projectfaf.js    the served project.faf string (drift-guarded vs ./project.faf)
+project.faf          the repo's own FAF context (app_type: server-card, TROPHY 100%)
 schema/              MCP's own server-card.schema.json (vendored)
-test/validate.mjs    validates the card against that schema
+test/                WJTTC suite — Brake / Engine / Aero / Tyres
 examples/            generated conformant snapshot
 ```
 
