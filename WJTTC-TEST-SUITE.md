@@ -4,7 +4,7 @@
 **Tester:** WJTTC (Wolfe James Tests The Code)
 **Date:** 2026-06-08
 **Runner:** Node native test runner (`node:test`) — zero extra deps
-**Result:** **27 pass · 0 fail · 3 grey-skip (Tyres) → 100% of gated tests · 🏆 Championship**
+**Result:** **39 tests · 36 pass · 0 fail · 3 grey-skip (Tyres) → 100% of gated tests pass**
 
 ---
 
@@ -26,9 +26,9 @@ No deploy needed for Brake / Engine / Aero — they drive the Worker's `fetch` h
 
 | Tier | Meaning | Failure = | Tests |
 |------|---------|-----------|-------|
-| **Brake** | must-never-fail; if red, the artifact *lies* | catastrophic (false claims) | 10 |
-| **Engine** | core correctness | wrong behaviour | 11 |
-| **Aero** | polish | minor inconvenience | 6 |
+| **Brake** | must-never-fail; if red, the artifact *lies* | catastrophic (false claims) | 12 |
+| **Engine** | core correctness | wrong behaviour | 16 |
+| **Aero** | polish | minor inconvenience | 8 |
 | **Tyres** | live probes vs a deployed instance | (grey-skip when not deployed) | 3 |
 
 ---
@@ -47,14 +47,16 @@ No deploy needed for Brake / Engine / Aero — they drive the Worker's `fetch` h
 | B8 | malformed JSON → `-32700`, never 500 | robustness |
 | B9 | empty body → parse error, not a crash | robustness |
 | B10 | unicode/emoji protocolVersion → safe fallback | Layer-2 expert edge |
+| B11 | `_meta.faf` is self-hosted (host-derived) — resolves on this origin | no dead pointer |
+| B12 | served `.faf` === committed `project.faf` (no drift) | source-of-truth integrity |
 
 ## Engine — correctness
 
-Routes (card / initialize / ping / `notifications/initialized` / unknown method `-32601` / 404), version negotiation + fallback, host-derived remote URL, OPTIONS/CORS preflight, wrong-method handling. **11 tests.**
+Routes (catalog / card / `.faf` / initialize / ping / `notifications/initialized` / unknown method `-32601` / 404), version negotiation + fallback, host-derived remote URL, OPTIONS/CORS preflight, wrong-method handling. **16 tests.**
 
 ## Aero — polish
 
-Content-types (JSON card, HTML landing), `cache-control`, CORS headers on success *and* error responses, landing page shows `curl` receipts + the `/mcp` endpoint. **6 tests.**
+Content-types (card `mcp-server-card+json`, catalog JSON, `.faf` `vnd.faf+yaml`, HTML landing), `cache-control`, CORS headers on success *and* error responses, landing page shows `curl` receipts. **8 tests.**
 
 ## Tyres — live probes
 
@@ -66,12 +68,8 @@ Against `WJTTC_TARGET`: live card conforms, live `initialize` negotiates + carri
 
 **Red means real.** No absolute-time perf assertions, no network calls in the gated tiers (Brake/Engine/Aero are fully offline against the handler), live network confined to Tyres which grey-skips rather than flakes. Target Signal Integrity = **100%** — every red corresponds to an actual defect.
 
-## Championship certification
+## Certification
 
-| Pass rate (gated) | Tier | Badge |
-|---|---|---|
-| **100%** | **Championship** | **🏆** |
+**36/36 gated tests pass; 0 fail.** Tyres (3) certify the moment `WJTTC_TARGET` is set against a deployment.
 
-27/27 gated tests pass. Tyres ready to certify the moment `WJTTC_TARGET` is set against a deployment.
-
-*We break things so others never have to know they were broken. 🏎️*
+*We break things so others never have to know they were broken.*
