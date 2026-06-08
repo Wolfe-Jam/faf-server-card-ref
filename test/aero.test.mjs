@@ -3,10 +3,15 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { call, rpc, CARD_PATH } from "./_helpers.mjs";
+import { call, rpc, CARD_PATH, CATALOG_PATH, CARD_MEDIA } from "./_helpers.mjs";
 
-test("🌀 card is application/json", async () => {
+test("🌀 card is application/mcp-server-card+json", async () => {
   const res = await call(CARD_PATH);
+  assert.match(res.headers.get("content-type") || "", new RegExp(CARD_MEDIA.replace("+", "\\+")));
+});
+
+test("🌀 catalog is application/json", async () => {
+  const res = await call(CATALOG_PATH);
   assert.match(res.headers.get("content-type") || "", /application\/json/);
 });
 

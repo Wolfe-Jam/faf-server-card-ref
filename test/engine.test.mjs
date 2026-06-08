@@ -3,12 +3,35 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { call, rpc, card, init, PROTO, CARD_PATH } from "./_helpers.mjs";
+import {
+  call, rpc, card, init, catalog,
+  PROTO, CARD_PATH, CARD_PATH_LEGACY, CATALOG_PATH, CARD_MEDIA,
+} from "./_helpers.mjs";
 
-test("⚙️ GET server-card → 200 + correct name", async () => {
+test("⚙️ GET card at reserved /mcp/server-card → 200 + correct name", async () => {
   const res = await call(CARD_PATH);
   assert.equal(res.status, 200);
   assert.equal((await res.json()).name, "one.faf/context");
+});
+
+test("⚙️ card served as application/mcp-server-card+json (#22 media type)", async () => {
+  const res = await call(CARD_PATH);
+  assert.match(res.headers.get("content-type") || "", new RegExp(CARD_MEDIA.replace("+", "\\+")));
+});
+
+test("⚙️ legacy /.well-known/mcp/server-card still serves (back-compat)", async () => {
+  const res = await call(CARD_PATH_LEGACY);
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).name, "one.faf/context");
+});
+
+test("⚙️ Catalog at /.well-known/mcp/catalog.json → entry points at the card", async () => {
+  const c = await catalog("tenant.example.dev");
+  assert.equal(c.specVersion, "draft");
+  const e = c.entries[0];
+  assert.equal(e.identifier, "urn:mcp:server:one.faf/context");
+  assert.equal(e.mediaType, CARD_MEDIA);
+  assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");
 });
 
 test("⚙️ initialize → serverInfo + capabilities + protocolVersion", async () => {

@@ -4,10 +4,11 @@
 
 One Cloudflare Worker is, simultaneously:
 
-1. **A conformant MCP Server Card** at `/.well-known/mcp/server-card` (the discovery layer), and
-2. **A live minimal MCP endpoint** at `/mcp` (the protocol layer),
+1. **An MCP Catalog** (discovery entrypoint) at `/.well-known/mcp/catalog.json`,
+2. **A conformant MCP Server Card** at `/mcp/server-card` — the reserved default location ([#22](https://github.com/modelcontextprotocol/experimental-ext-server-card/pull/22)), served as `application/mcp-server-card+json`; `/.well-known/mcp/server-card` kept for back-compat, and
+3. **A live minimal MCP endpoint** at `/mcp` (the protocol layer),
 
-— both carrying FAF context in the reverse-DNS `_meta` slot (`one.faf/context`). Discovery and protocol say the same thing, so the card never contradicts the running server ([SEP-2127 issue #23](https://github.com/modelcontextprotocol/experimental-ext-server-card/issues/23)).
+— the card and the runtime both carry FAF context in the reverse-DNS `_meta` slot (`one.faf/context`). Discovery and protocol say the same thing, so the card never contradicts the running server ([#23](https://github.com/modelcontextprotocol/experimental-ext-server-card/issues/23)).
 
 This is a **show-the-flow** artifact, not a pitch. It demonstrates — with receipts you can `curl` — that FAF is a well-behaved citizen of MCP's own `_meta` extension mechanism: the context layer, registered and live.
 
@@ -15,18 +16,21 @@ This is a **show-the-flow** artifact, not a pitch. It demonstrates — with rece
 
 ```bash
 npm install
-npm run validate
+npm test          # WJTTC: 🛡️ Brake · ⚙️ Engine · 🌀 Aero · 🛞 Tyres
 ```
 
-`test/validate.mjs` validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`). Green = it is a conformant Server Card. It also writes a fresh `examples/server-card.json` snapshot so the committed example never drifts.
+The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes) grey-skip unless `WJTTC_TARGET` is set.
 
 ## Receipts (after `npm run deploy`)
 
 ```bash
-# Discovery
-curl https://card.faf.one/.well-known/mcp/server-card
+# Discovery — the Catalog entrypoint
+curl https://card.faf.one/.well-known/mcp/catalog.json
 
-# Protocol — same FAF context in _meta
+# The Server Card — reserved default location, application/mcp-server-card+json
+curl -H 'accept: application/mcp-server-card+json' https://card.faf.one/mcp/server-card
+
+# Protocol — same FAF context in _meta (#23)
 curl -s https://card.faf.one/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25"}}'
 ```

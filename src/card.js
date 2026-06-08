@@ -43,9 +43,34 @@ export function fafContext(nowISO) {
   };
 }
 
+export const SERVER_NAME = "one.faf/context"; // reverse-DNS name + _meta key
+export const SERVER_TITLE = "FAF Context Endpoint";
+export const CARD_MEDIA_TYPE = "application/mcp-server-card+json";
+
+/**
+ * Build the MCP Catalog (discovery entrypoint) served at
+ * `/.well-known/mcp/catalog.json` (post experimental-ext-server-card#22).
+ * The Catalog is the entrypoint; each entry points at where the card lives.
+ * @param {string} host
+ */
+export function buildCatalog(host) {
+  return {
+    specVersion: "draft",
+    entries: [
+      {
+        identifier: `urn:mcp:server:${SERVER_NAME}`,
+        displayName: SERVER_TITLE,
+        mediaType: CARD_MEDIA_TYPE,
+        // Reserved default location: <streamable-http-url>/server-card.
+        url: `https://${host}/mcp/server-card`,
+      },
+    ],
+  };
+}
+
 /**
  * Build a conformant MCP Server Card for the FAF context endpoint.
- * @param {string} host  the host the card is served from (e.g. "card.faf.one")
+ * @param {string} host  the host the card is served from
  * @param {string} nowISO ISO-8601 timestamp
  */
 export function buildServerCard(host, nowISO) {
@@ -53,11 +78,11 @@ export function buildServerCard(host, nowISO) {
   return {
     $schema:
       "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
-    name: "one.faf/context",
+    name: SERVER_NAME,
     version: "1.0.0",
     description:
       "Reference MCP Server Card carrying FAF context in _meta - the C in MCP, with receipts.",
-    title: "FAF Context Endpoint",
+    title: SERVER_TITLE,
     websiteUrl: "https://faf.one",
     repository: {
       url: "https://github.com/Wolfe-Jam/faf-cli",

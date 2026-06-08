@@ -17,9 +17,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(here, "..");
 export const SCHEMA_ID =
   "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json";
-export const MEDIA_TYPE = "application/vnd.faf+yaml";
+export const MEDIA_TYPE = "application/vnd.faf+yaml"; // the FAF context artifact
+export const CARD_MEDIA = "application/mcp-server-card+json"; // the card's own media type
 export const PROTO = "2025-11-25";
-export const CARD_PATH = "/.well-known/mcp/server-card";
+export const CARD_PATH = "/mcp/server-card"; // reserved default (post #22)
+export const CARD_PATH_LEGACY = "/.well-known/mcp/server-card"; // back-compat
+export const CATALOG_PATH = "/.well-known/mcp/catalog.json";
 
 /** Compile a validator bound to MCP's own ServerCard definition. */
 export function serverCardValidator() {
@@ -54,5 +57,6 @@ export function rpc(method, params, id = 1) {
 }
 
 export const card = (host) => call(CARD_PATH, undefined, host).then((r) => r.json());
+export const catalog = (host) => call(CATALOG_PATH, undefined, host).then((r) => r.json());
 export const init = (params, host) =>
   call("/mcp", rpc("initialize", params), host).then((r) => r.json());
