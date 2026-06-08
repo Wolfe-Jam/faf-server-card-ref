@@ -12,7 +12,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://card.faf.one/mcp",
+      "url": "https://context.faf.one/mcp",
       "supportedProtocolVersions": [
         "2025-11-25"
       ]

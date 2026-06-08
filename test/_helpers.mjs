@@ -38,7 +38,7 @@ export function serverCardValidator() {
 }
 
 /** Call the worker. host is configurable to test host-derivation. */
-export function call(path, init, host = "card.faf.one") {
+export function call(path, init, host = "context.faf.one") {
   return worker.fetch(new Request(`https://${host}${path}`, init), {}, {});
 }
 
