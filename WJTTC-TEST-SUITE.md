@@ -15,7 +15,7 @@ npm test            # Brake + Engine + Aero + Tyres (Tyres grey-skip if no targe
 npm run test:brake  # 🛡️ must-never-fail
 npm run test:engine # ⚙️ correctness
 npm run test:aero   # 🌀 polish
-WJTTC_TARGET=https://card.faf.one npm run test:tyres   # 🛞 live probes
+WJTTC_TARGET=https://context.faf.one npm run test:tyres   # 🛞 live probes
 ```
 
 No deploy needed for Brake / Engine / Aero — they drive the Worker's `fetch` handler directly with web-standard `Request`/`Response` (the same primitives the Workers runtime provides).
