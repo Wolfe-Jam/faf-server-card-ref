@@ -15,6 +15,11 @@ test("🌀 catalog is application/json", async () => {
   assert.match(res.headers.get("content-type") || "", /application\/json/);
 });
 
+test("🌀 .faf served as application/vnd.faf+yaml", async () => {
+  const res = await call("/.well-known/project.faf");
+  assert.match(res.headers.get("content-type") || "", /application\/vnd\.faf\+yaml/);
+});
+
 test("🌀 card sets a cache-control (near-static)", async () => {
   const res = await call(CARD_PATH);
   assert.match(res.headers.get("cache-control") || "", /max-age=\d+/);

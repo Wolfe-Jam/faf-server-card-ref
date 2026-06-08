@@ -32,9 +32,10 @@
  *   scoreEndpoint where the live score is computed (we link it, never bake a number)
  *   generated     metastamp timestamp
  */
-export function fafContext(nowISO) {
+export function fafContext(host, nowISO) {
   return {
-    faf: "https://faf.one/.well-known/project.faf",
+    // Self-hosted: the same origin serves this .faf (see /.well-known/project.faf).
+    faf: `https://${host}/.well-known/project.faf`,
     mediaType: "application/vnd.faf+yaml",
     iana: "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
     deterministic: true,
@@ -98,7 +99,7 @@ export function buildServerCard(host, nowISO) {
     // Reverse-DNS namespaced extension — FAF is a good citizen of MCP's _meta,
     // not a competing format. The shape conforms; the substance is invariant.
     _meta: {
-      "one.faf/context": fafContext(nowISO),
+      "one.faf/context": fafContext(host, nowISO),
     },
   };
 }

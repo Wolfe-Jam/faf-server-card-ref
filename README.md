@@ -30,6 +30,9 @@ curl https://context.faf.one/.well-known/mcp/catalog.json
 # The Server Card — reserved default location, application/mcp-server-card+json
 curl -H 'accept: application/mcp-server-card+json' https://context.faf.one/mcp/server-card
 
+# The FAF context the card's _meta.faf points to (self-hosted, application/vnd.faf+yaml)
+curl https://context.faf.one/.well-known/project.faf
+
 # Protocol — same FAF context in _meta (#23)
 curl -s https://context.faf.one/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25"}}'

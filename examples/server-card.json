@@ -20,7 +20,7 @@
   ],
   "_meta": {
     "one.faf/context": {
-      "faf": "https://faf.one/.well-known/project.faf",
+      "faf": "https://context.faf.one/.well-known/project.faf",
       "mediaType": "application/vnd.faf+yaml",
       "iana": "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
       "deterministic": true,

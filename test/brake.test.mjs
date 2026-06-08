@@ -4,6 +4,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   serverCardValidator,
   call,
@@ -14,7 +16,18 @@ import {
   MEDIA_TYPE,
   PROTO,
   CARD_PATH,
+  ROOT,
 } from "./_helpers.mjs";
+import { PROJECT_FAF } from "../src/projectfaf.js";
+
+test("🛡️ _meta.faf is self-hosted (host-derived) — resolves on this origin", async () => {
+  const ctx = (await card("ctx.example"))._meta["one.faf/context"];
+  assert.equal(ctx.faf, "https://ctx.example/.well-known/project.faf");
+});
+
+test("🛡️ PROJECT_FAF (served) === the committed project.faf (no drift)", () => {
+  assert.equal(PROJECT_FAF, readFileSync(join(ROOT, "project.faf"), "utf8"));
+});
 
 const validate = serverCardValidator();
 

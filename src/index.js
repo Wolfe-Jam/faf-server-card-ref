@@ -19,6 +19,9 @@ import {
   SERVER_TITLE,
   CARD_MEDIA_TYPE,
 } from "./card.js";
+import { PROJECT_FAF } from "./projectfaf.js";
+
+const FAF_MEDIA_TYPE = "application/vnd.faf+yaml";
 
 const SUPPORTED = ["2025-11-25"]; // only what /mcp genuinely answers (honest-first)
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
@@ -71,6 +74,20 @@ export default {
       });
     }
 
+    // 1b. The .faf context artifact the card's `_meta.faf` points to (self-hosted).
+    if (
+      url.pathname === "/.well-known/project.faf" ||
+      url.pathname === "/project.faf"
+    ) {
+      return new Response(PROJECT_FAF, {
+        headers: {
+          "content-type": `${FAF_MEDIA_TYPE}; charset=utf-8`,
+          "cache-control": "public, max-age=300",
+          ...cors,
+        },
+      });
+    }
+
     // 2. The Server Card — reserved default `<mcp-url>/server-card`, plus the
     //    legacy `.well-known` path for back-compat (#22 moved it off .well-known).
     if (
@@ -101,7 +118,7 @@ export default {
             capabilities: {},
             serverInfo: { name: SERVER_NAME, version: "1.0.0", title: SERVER_TITLE },
             // Same FAF context the card carries — discovery and protocol agree (#23).
-            _meta: { [SERVER_NAME]: fafContext(nowISO) },
+            _meta: { [SERVER_NAME]: fafContext(url.host, nowISO) },
           });
         }
         case "ping":
@@ -147,6 +164,9 @@ curl ${base}/.well-known/mcp/catalog.json
 
 # Server Card — reserved default location (#22), application/mcp-server-card+json
 curl -H 'accept: application/mcp-server-card+json' ${base}/mcp/server-card
+
+# The FAF context the card points to (_meta.faf, self-hosted)
+curl ${base}/.well-known/project.faf
 
 # Live MCP endpoint — same FAF context in _meta (#23)
 curl -s ${base}/mcp -H 'content-type: application/json' \\

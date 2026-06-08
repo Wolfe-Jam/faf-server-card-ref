@@ -25,6 +25,18 @@ test("⚙️ legacy /.well-known/mcp/server-card still serves (back-compat)", as
   assert.equal((await res.json()).name, "one.faf/context");
 });
 
+test("⚙️ GET /.well-known/project.faf → 200, the .faf context", async () => {
+  const res = await call("/.well-known/project.faf");
+  assert.equal(res.status, 200);
+  const body = await res.text();
+  assert.match(body, /^faf_version:/);
+  assert.match(body, /app_type: server-card/);
+});
+
+test("⚙️ /project.faf short path also serves", async () => {
+  assert.equal((await call("/project.faf")).status, 200);
+});
+
 test("⚙️ Catalog at /.well-known/mcp/catalog.json → entry points at the card", async () => {
   const c = await catalog("tenant.example.dev");
   assert.equal(c.specVersion, "draft");
