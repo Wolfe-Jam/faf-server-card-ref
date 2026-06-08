@@ -1,4 +1,4 @@
-# 🏎️ WJTTC Test Suite — faf-server-card-ref
+# WJTTC Test Suite — faf-server-card-ref
 
 **Project:** `faf-server-card-ref` — MCP Server Card + live MCP endpoint carrying the canonical FAF context block in `_meta`
 **Tester:** WJTTC (Wolfe James Tests The Code)
