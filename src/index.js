@@ -150,10 +150,11 @@ function landing(base) {
   body{font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;max-width:760px;
        margin:6vh auto;padding:0 5vw;color:#0b0b0b;background:#fafafa}
   h1{font-size:1.4rem} code,pre{background:#eef2f2;border-radius:6px}
-  pre{padding:1rem;overflow:auto} a{color:#0a7d7d} .c{color:#00D4D4}
+  pre{padding:1rem;overflow:auto} a{color:#0a7d7d}
   .r{color:#666;font-size:.85rem}
 </style></head><body>
 <h1>FAF Server Card — reference artifact</h1>
+<p><strong>Persistent project context for MCP servers.</strong></p>
 <p>An MCP <a href="https://github.com/modelcontextprotocol/experimental-ext-server-card">Catalog + Server Card</a>
 that carries <strong>FAF context</strong> in the reverse-DNS <code>_meta</code> slot — and a live
 minimal MCP endpoint that says the same thing. Discovery and protocol agree (#23).</p>
@@ -171,7 +172,6 @@ curl ${base}/.well-known/project.faf
 # Live MCP endpoint — same FAF context in _meta (#23)
 curl -s ${base}/mcp -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25"}}'</pre>
-<p class="r">FAF is the <span class="c">C</span> in MCP. Not a pitch — a running example you can curl.
-The context layer, registered and live.</p>
+<p class="r">Source: <a href="https://github.com/Wolfe-Jam/faf-server-card-ref">github.com/Wolfe-Jam/faf-server-card-ref</a> · MIT</p>
 </body></html>`;
 }
