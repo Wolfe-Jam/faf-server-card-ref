@@ -19,7 +19,7 @@ import {
 const validate = serverCardValidator();
 
 test("🛡️ static card conforms to MCP's own schema (2020-12)", () => {
-  const c = buildServerCard("card.faf.one", "2026-06-08T00:00:00Z");
+  const c = buildServerCard("context.faf.one", "2026-06-08T00:00:00Z");
   assert.ok(validate(c), JSON.stringify(validate.errors, null, 2));
 });
 

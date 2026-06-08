@@ -3,7 +3,7 @@
  *
  * Signal-Integrity discipline: these GREY-SKIP when no target is set. A missing
  * deploy is not a code defect, so it must never go red (dead-signal prevention).
- * Run live:  WJTTC_TARGET=https://card.faf.one npm run test:tyres
+ * Run live:  WJTTC_TARGET=https://context.faf.one npm run test:tyres
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
