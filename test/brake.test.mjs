@@ -45,11 +45,11 @@ test("Brake · card↔runtime _meta parity (SEP-2127 #23)", async () => {
   const fromRuntime = (await init({ protocolVersion: PROTO })).result._meta[
     "one.faf/context"
   ];
-  const strip = ({ generated, ...rest }) => rest; // timestamp is per-request
+  const strip = ({ generated_at, ...rest }) => rest; // freshness is per-request
   assert.deepEqual(
     strip(fromCard),
     strip(fromRuntime),
-    "the card must not contradict the running server",
+    "the card must not contradict the running server (deterministic `generated` included)",
   );
 });
 

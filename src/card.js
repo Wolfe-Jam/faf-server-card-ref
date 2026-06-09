@@ -18,6 +18,8 @@
  *    NOT contradict the server's actual runtime behavior).
  */
 
+import { FAF_GENERATED } from "./projectfaf.js"; // deterministic provenance stamp (single source)
+
 /**
  * THE CANONICAL FAF CONTEXT BLOCK.
  *
@@ -30,7 +32,12 @@
  *   iana          the IANA assignment record
  *   deterministic the .faf score is mechanical + reproducible
  *   scoreEndpoint where the live score is computed (we link it, never bake a number)
- *   generated     metastamp timestamp
+ *   generated     PROVENANCE — when the .faf context was authored/built. Deterministic,
+ *                 sourced from the served .faf (FAF_GENERATED), so the card never
+ *                 contradicts the artifact it points to.
+ *   generated_at  FRESHNESS — when THIS card response was generated (request time).
+ *                 The declarable liveness signal floated in SEP-2127 (#2127): the card
+ *                 is served live, not a stale committed blob. Provenance ≠ freshness.
  */
 export function fafContext(host, nowISO) {
   return {
@@ -40,7 +47,8 @@ export function fafContext(host, nowISO) {
     iana: "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
     deterministic: true,
     scoreEndpoint: "https://faf.one",
-    generated: nowISO,
+    generated: FAF_GENERATED, // deterministic provenance — matches the served .faf
+    generated_at: nowISO, // freshness — when this response was served (liveness)
   };
 }
 
