@@ -63,3 +63,12 @@ commands:
   dev: npm run dev
   deploy: npm run deploy
 `;
+
+/**
+ * The deterministic content-provenance stamp — parsed from PROJECT_FAF's own
+ * `generated:` line, so it can NEVER drift from the served .faf (single source).
+ * This is PROVENANCE (when the context was authored + built), and it is what the
+ * card's `_meta` block reports as `generated`. It is distinct from the card's
+ * `generated_at` freshness signal (when a given card response was served).
+ */
+export const FAF_GENERATED = PROJECT_FAF.match(/^generated:\s*(.+)$/m)[1].trim();
