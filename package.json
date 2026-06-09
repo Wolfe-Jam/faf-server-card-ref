@@ -12,6 +12,7 @@
     "test:aero": "node --test test/aero.test.mjs",
     "test:tyres": "node --test test/tyres.test.mjs",
     "snapshot": "node scripts/snapshot.mjs",
+    "build:validator": "node scripts/build-validator.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

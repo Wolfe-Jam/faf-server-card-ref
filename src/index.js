@@ -20,8 +20,23 @@ import {
   CARD_MEDIA_TYPE,
 } from "./card.js";
 import { PROJECT_FAF } from "./projectfaf.js";
+import validate from "./validator.cjs"; // ajv standalone (precompiled, no runtime eval)
 
 const FAF_MEDIA_TYPE = "application/vnd.faf+yaml";
+
+/** Validate a card against MCP's published schema → {conformant, errors}. */
+function validationResult(card) {
+  const ok = validate(card);
+  return {
+    conformant: !!ok,
+    errors: ok
+      ? []
+      : (validate.errors || []).map((e) => ({
+          path: e.instancePath || "/",
+          message: e.message,
+        })),
+  };
+}
 
 const SUPPORTED = ["2025-11-25"]; // only what /mcp genuinely answers (honest-first)
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
@@ -130,6 +145,32 @@ export default {
       }
     }
 
+    // 3b. Validator — check ANY Server Card against MCP's published schema.
+    if (url.pathname === "/validate") {
+      let card;
+      if (request.method === "POST") {
+        try {
+          card = await request.json();
+        } catch {
+          return json({ error: "POST body must be a JSON Server Card" }, { status: 400 });
+        }
+      } else if (request.method === "GET" && url.searchParams.get("url")) {
+        const target = url.searchParams.get("url");
+        try {
+          const r = await fetch(target, {
+            headers: { accept: "application/mcp-server-card+json, application/json" },
+          });
+          if (!r.ok) return json({ error: `fetch ${target} → ${r.status}` }, { status: 400 });
+          card = await r.json();
+        } catch {
+          return json({ error: `could not fetch or parse ${target}` }, { status: 400 });
+        }
+      } else {
+        return json({ usage: "POST a Server Card JSON body, or GET /validate?url=<card-url>" });
+      }
+      return json(validationResult(card));
+    }
+
     // 4. Human-readable explainer (show the flow)
     if (url.pathname === "/") {
       return new Response(landing(`https://${url.host}`), {
@@ -152,6 +193,8 @@ function landing(base) {
   h1{font-size:1.4rem} code,pre{background:#eef2f2;border-radius:6px}
   pre{padding:1rem;overflow:auto} a{color:#0a7d7d}
   .r{color:#666;font-size:.85rem}
+  textarea,input{width:100%;font:13px/1.5 ui-monospace,Menlo,monospace;padding:.5rem;margin:.3rem 0;border:1px solid #cdd;border-radius:6px;box-sizing:border-box}
+  button{font:inherit;padding:.5rem 1rem;border:0;border-radius:6px;background:#0a7d7d;color:#fff;cursor:pointer}
 </style></head><body>
 <h1>FAF Server Card — reference artifact</h1>
 <p><strong>Persistent project context for MCP servers.</strong></p>
@@ -172,6 +215,18 @@ curl ${base}/.well-known/project.faf
 # Live MCP endpoint — same FAF context in _meta (#23)
 curl -s ${base}/mcp -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25"}}'</pre>
-<p class="r">Source: <a href="https://github.com/Wolfe-Jam/faf-server-card-ref">github.com/Wolfe-Jam/faf-server-card-ref</a> · MIT</p>
+<h2>Validate a Server Card</h2>
+<p>Paste a card, or give its URL — checked against MCP's published <code>server-card.schema.json</code>.</p>
+<textarea id="c" rows="5" placeholder='{"$schema":"https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json","name":"ns/name","version":"1.0.0","description":"..."}'></textarea>
+<input id="u" placeholder="…or a URL, e.g. https://context.faf.one/mcp/server-card">
+<button onclick="v()">Validate</button>
+<pre id="o"></pre>
+<script>
+async function v(){var o=document.getElementById('o');o.textContent='checking…';
+var u=document.getElementById('u').value.trim(),c=document.getElementById('c').value.trim();
+try{var r=u?await fetch('/validate?url='+encodeURIComponent(u)):await fetch('/validate',{method:'POST',headers:{'content-type':'application/json'},body:c});
+o.textContent=JSON.stringify(await r.json(),null,2);}catch(e){o.textContent='error: '+e}}
+</script>
+<p class="r">Source: <a href="https://github.com/Wolfe-Jam/faf-server-card-ref">github.com/Wolfe-Jam/faf-server-card-ref</a> · MIT · also: <code>curl -s context.faf.one/validate?url=&lt;your-card&gt;</code></p>
 </body></html>`;
 }

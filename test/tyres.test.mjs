@@ -38,6 +38,19 @@ test("Tyres · live /mcp initialize negotiates + carries context", { skip }, asy
   assert.equal(body.result._meta["one.faf/context"].mediaType, MEDIA_TYPE);
 });
 
+test("Tyres · live /validate (POST the live card) → conformant", { skip }, async () => {
+  // POST the card (not ?url=self — a worker fetching its own custom domain loops/522).
+  const liveCard = await (await fetch(`${TARGET}${CARD_PATH}`)).json();
+  const r = await fetch(`${TARGET}/validate`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(liveCard),
+  });
+  const j = await r.json();
+  assert.equal(j.conformant, true);
+  assert.deepEqual(j.errors, []);
+});
+
 test("Tyres · live remote URL matches the deployed host", { skip }, async () => {
   const host = new URL(TARGET).host;
   const body = await (await fetch(`${TARGET}${CARD_PATH}`)).json();

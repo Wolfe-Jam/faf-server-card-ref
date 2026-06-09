@@ -46,6 +46,28 @@ test("Engine · Catalog at /.well-known/mcp/catalog.json → entry points at the
   assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");
 });
 
+test("Engine · POST /validate — conformant card → conformant:true, no errors", async () => {
+  const c = await card();
+  const j = await call("/validate", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(c),
+  }).then((r) => r.json());
+  assert.equal(j.conformant, true);
+  assert.deepEqual(j.errors, []);
+});
+
+test("Engine · POST /validate — non-conformant card → conformant:false + errors", async () => {
+  const j = await call("/validate", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "no-slash" }),
+  }).then((r) => r.json());
+  assert.equal(j.conformant, false);
+  assert.ok(j.errors.length > 0);
+});
+
+test("Engine · GET /validate (no input) → usage hint", async () => {
+  const j = await call("/validate").then((r) => r.json());
+  assert.match(j.usage || "", /url=/);
+});
+
 test("Engine · initialize → serverInfo + capabilities + protocolVersion", async () => {
   const r = await init({ protocolVersion: PROTO });
   assert.equal(r.jsonrpc, "2.0");
