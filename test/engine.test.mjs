@@ -41,7 +41,7 @@ test("Engine · Catalog at /.well-known/mcp/catalog.json → entry points at the
   const c = await catalog("tenant.example.dev");
   assert.equal(c.specVersion, "draft");
   const e = c.entries[0];
-  assert.equal(e.identifier, "urn:mcp:server:one.faf/context");
+  assert.equal(e.identifier, "urn:air:faf.one:mcp:context"); // discovery.md urn:air:{publisher}:{ns}:{name}
   assert.equal(e.mediaType, CARD_MEDIA);
   assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");
 });

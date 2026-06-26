@@ -63,12 +63,19 @@ export const CARD_MEDIA_TYPE = "application/mcp-server-card+json";
  * @param {string} host
  */
 export function buildCatalog(host) {
+  // discovery.md (experimental-ext-server-card) requires the AI Catalog
+  // urn:air:{publisher}:{namespace}:{name} convention (ADR 0015): publisher = the
+  // forward-DNS of the card name's reverse-DNS prefix; name = the segment after "/".
+  const [rev, suffix] = SERVER_NAME.split("/"); // "one.faf", "context"
+  const publisher = rev.split(".").reverse().join("."); // "faf.one"
   return {
     specVersion: "draft",
     entries: [
       {
-        identifier: `urn:mcp:server:${SERVER_NAME}`,
+        identifier: `urn:air:${publisher}:mcp:${suffix}`, // urn:air:faf.one:mcp:context
         displayName: SERVER_TITLE,
+        // Field is `mediaType` per CURRENT discovery.md (MUST be application/mcp-server-card+json).
+        // Flip to `type` only when experimental-ext-server-card#32 (the rename) merges.
         mediaType: CARD_MEDIA_TYPE,
         // Reserved default location: <streamable-http-url>/server-card.
         url: `https://${host}/mcp/server-card`,
@@ -97,6 +104,13 @@ export function buildServerCard(host, nowISO) {
       url: "https://github.com/Wolfe-Jam/faf-cli",
       source: "github",
     },
+    // Optional sized icons — experimental-ext-server-card#36 ("fill the card out completely").
+    // PNG only: the MIME type every conformant client MUST support. All three resolve live.
+    icons: [
+      { src: "https://faf.one/favicon.png", mimeType: "image/png" },
+      { src: "https://faf.one/apple-touch-icon.png", mimeType: "image/png" },
+      { src: "https://faf.one/faf-logo.png", mimeType: "image/png" },
+    ],
     remotes: [
       {
         type: "streamable-http",
