@@ -73,10 +73,9 @@ export function buildCatalog(host) {
     entries: [
       {
         identifier: `urn:air:${publisher}:mcp:${suffix}`, // urn:air:faf.one:mcp:context
-        displayName: SERVER_TITLE,
-        // Field is `mediaType` per CURRENT discovery.md (MUST be application/mcp-server-card+json).
-        // Flip to `type` only when experimental-ext-server-card#32 (the rename) merges.
-        mediaType: CARD_MEDIA_TYPE,
+        // ADR 0014 (experimental-ext-server-card#32, merged 2026-07-13): CatalogEntry
+        // field renamed mediaType -> type. #39 (same day) dropped displayName.
+        type: CARD_MEDIA_TYPE,
         // Reserved default location: <streamable-http-url>/server-card.
         url: `https://${host}/mcp/server-card`,
       },

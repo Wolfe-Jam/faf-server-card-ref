@@ -42,7 +42,8 @@ test("Engine · Catalog at /.well-known/mcp/catalog.json → entry points at the
   assert.equal(c.specVersion, "draft");
   const e = c.entries[0];
   assert.equal(e.identifier, "urn:air:faf.one:mcp:context"); // discovery.md urn:air:{publisher}:{ns}:{name}
-  assert.equal(e.mediaType, CARD_MEDIA);
+  assert.equal(e.type, CARD_MEDIA); // ADR 0014: CatalogEntry field renamed mediaType -> type
+  assert.equal(e.displayName, undefined); // #39: displayName dropped from Catalog entries
   assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");
 });
 
