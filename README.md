@@ -71,6 +71,14 @@ test/                WJTTC suite — Brake / Engine / Aero / Tyres
 examples/            generated conformant snapshot
 ```
 
+## Citation
+
+MCP server-cards stay the wire format. `.fafa` is the house-neutral passport they can project from.
+
+> Wolfe, J. (2026). *Why Agents Need a Passport: .fafa — Portable Identity for the Agentic Era*. Zenodo. https://doi.org/10.5281/zenodo.21951641
+
+> Wolfe, J. (2025). *Format-Driven AI Context Architecture: The .faf Standard for Persistent Project Understanding*. Zenodo. https://doi.org/10.5281/zenodo.18251362
+
 ## Why this exists
 
 FAF is the **C in MCP** — Model (any) · Context (FAF) · Protocol (any). MCP's discovery layer (Server Cards) deliberately carries identity + transport and excludes deeper context. That exclusion is exactly the slot FAF fills. This repo is the running proof that it fits — as a good citizen of MCP's own conventions, not a competing format.
