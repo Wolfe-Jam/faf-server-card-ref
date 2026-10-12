@@ -41,10 +41,13 @@ function validationResult(card) {
 const SUPPORTED = ["2025-11-25"]; // only what /mcp genuinely answers (honest-first)
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
 
+// One CORS set for the card and /mcp. ext-server-card discovery.md § CORS Requirements:
+// GET with Content-Type + If-None-Match allowed, ETag exposed (browser clients revalidate).
 const cors = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, OPTIONS",
-  "access-control-allow-headers": "content-type, mcp-protocol-version, accept",
+  "access-control-allow-headers": "content-type, if-none-match, mcp-protocol-version, accept",
+  "access-control-expose-headers": "etag, mcp-session-id",
 };
 
 function json(body, init = {}) {
@@ -56,13 +59,22 @@ function json(body, init = {}) {
 
 /** Server Card response — served with the `application/mcp-server-card+json`
  *  media type the spec reserves, echoed in Content-Type per content negotiation. */
-function cardResponse(host, nowISO) {
-  return new Response(JSON.stringify(buildServerCard(host, nowISO), null, 2), {
-    headers: {
-      "content-type": `${CARD_MEDIA_TYPE}; charset=utf-8`,
-      "cache-control": "public, max-age=300",
-      ...cors,
-    },
+async function cardResponse(request, host, nowISO) {
+  const card = buildServerCard(host, nowISO);
+  // `_meta["one.faf/context"].generated_at` is request time by design (the freshness
+  // rider), so the bytes differ every time. The ETag is WEAK and hashes the card
+  // without it: same card = same validator, and If-None-Match uses weak comparison.
+  const stable = structuredClone(card);
+  delete stable?._meta?.["one.faf/context"]?.generated_at;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(stable)));
+  const etag = `W/"${[...new Uint8Array(digest)].slice(0, 16).map((b) => b.toString(16).padStart(2, "0")).join("")}"`;
+  const headers = { "cache-control": "public, max-age=300", etag, ...cors };
+  const match = request.headers.get("if-none-match");
+  if (match && match.split(",").some((t) => t.trim().replace(/^W\//, "") === etag.replace(/^W\//, ""))) {
+    return new Response(null, { status: 304, headers });
+  }
+  return new Response(JSON.stringify(card, null, 2), {
+    headers: { "content-type": `${CARD_MEDIA_TYPE}; charset=utf-8`, ...headers },
   });
 }
 
@@ -109,7 +121,7 @@ export default {
       url.pathname === "/mcp/server-card" ||
       url.pathname === "/.well-known/mcp/server-card"
     ) {
-      return cardResponse(url.host, nowISO);
+      return cardResponse(request, url.host, nowISO);
     }
 
     // 3. Minimal live MCP endpoint (protocol layer) — keeps the card truthful.
