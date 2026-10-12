@@ -49,3 +49,25 @@ test("Aero · landing references the live /mcp endpoint", async () => {
   const html = await (await call("/")).text();
   assert.match(html, /\/mcp/);
 });
+
+test("Aero · card CORS: If-None-Match allowed in preflight, ETag exposed (discovery.md § CORS Requirements)", async () => {
+  const pre = await call(CARD_PATH, { method: "OPTIONS", headers: { "Access-Control-Request-Headers": "if-none-match" } });
+  assert.match(pre.headers.get("access-control-allow-methods") || "", /\bGET\b/);
+  assert.match(pre.headers.get("access-control-allow-headers") || "", /if-none-match/i);
+  assert.match(pre.headers.get("access-control-allow-headers") || "", /content-type/i);
+  const res = await call(CARD_PATH);
+  assert.match(res.headers.get("access-control-expose-headers") || "", /\betag\b/i);
+});
+
+test("Aero · card ETag is weak and stable across requests; If-None-Match gets 304 (§ Caching)", async () => {
+  const a = await call(CARD_PATH);
+  const b = await call(CARD_PATH);
+  const etag = a.headers.get("etag") || "";
+  assert.match(etag, /^W\/"[0-9a-f]{32}"$/);
+  assert.equal(b.headers.get("etag"), etag); // generated_at differs, the validator doesn't
+  const again = await call(CARD_PATH, { headers: { "If-None-Match": etag } });
+  assert.equal(again.status, 304);
+  assert.equal(again.headers.get("etag"), etag);
+  const stale = await call(CARD_PATH, { headers: { "If-None-Match": 'W/"0000"' } });
+  assert.equal(stale.status, 200);
+});
