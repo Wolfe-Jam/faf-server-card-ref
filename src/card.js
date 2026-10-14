@@ -114,7 +114,7 @@ export function buildServerCard(host, nowISO) {
       {
         type: "streamable-http",
         url: `${base}/mcp`,
-        supportedProtocolVersions: ["2025-11-25"],
+        supportedProtocolVersions: ["2025-11-25", "2026-07-28"],
       },
     ],
     // Reverse-DNS namespaced extension — FAF is a good citizen of MCP's _meta,

@@ -38,7 +38,12 @@ function validationResult(card) {
   };
 }
 
-const SUPPORTED = ["2025-11-25"]; // only what /mcp genuinely answers (honest-first)
+// Only what /mcp genuinely answers (honest-first). 2025-11-25 = the initialize handshake;
+// 2026-07-28 = per-request `_meta`, with server/discover and ping.
+const LEGACY_SUPPORTED = ["2025-11-25"];
+const MODERN_SUPPORTED = ["2026-07-28"];
+const ALL_SUPPORTED = [...MODERN_SUPPORTED, ...LEGACY_SUPPORTED];
+const META_VERSION = "io.modelcontextprotocol/protocolVersion";
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
 
 // One CORS set for the card and /mcp. ext-server-card discovery.md § CORS Requirements:
@@ -46,7 +51,7 @@ const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
 const cors = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, OPTIONS",
-  "access-control-allow-headers": "content-type, if-none-match, mcp-protocol-version, accept",
+  "access-control-allow-headers": "content-type, if-none-match, mcp-protocol-version, mcp-method, mcp-name, accept",
   "access-control-expose-headers": "etag, mcp-session-id",
 };
 
@@ -81,8 +86,48 @@ async function cardResponse(request, host, nowISO) {
 function rpcResult(id, result) {
   return json({ jsonrpc: "2.0", id, result });
 }
-function rpcError(id, code, message) {
-  return json({ jsonrpc: "2.0", id, error: { code, message } });
+function rpcError(id, code, message, status = 200, data) {
+  return json({ jsonrpc: "2.0", id, error: { code, message, ...(data ? { data } : {}) } }, { status });
+}
+
+/**
+ * A 2026-07-28 request (per-request `_meta`), per streamable-http § Protocol Version Header
+ * and § Server Validation: headers must be present and match the body (400, -32020),
+ * the version must be one we support (400, -32022), unknown methods get 404 (-32601).
+ */
+function modernRequest(request, id, method, params, host, nowISO) {
+  const bodyVersion = params?._meta?.[META_VERSION];
+  const headerVersion = request.headers.get("mcp-protocol-version");
+  const headerMethod = request.headers.get("mcp-method");
+  if (!headerVersion || !headerMethod) {
+    return rpcError(id ?? null, -32020, `Header mismatch: ${!headerVersion ? "MCP-Protocol-Version" : "Mcp-Method"} header is missing`, 400);
+  }
+  if (headerVersion !== bodyVersion) {
+    return rpcError(id ?? null, -32020, `Header mismatch: MCP-Protocol-Version header value '${headerVersion}' does not match body value '${bodyVersion}'`, 400);
+  }
+  if (headerMethod !== method) {
+    return rpcError(id ?? null, -32020, `Header mismatch: Mcp-Method header value '${headerMethod}' does not match body value '${method}'`, 400);
+  }
+  if (!MODERN_SUPPORTED.includes(bodyVersion)) {
+    return rpcError(id ?? null, -32022, "Unsupported protocol version", 400, { supported: ALL_SUPPORTED, requested: bodyVersion });
+  }
+  switch (method) {
+    case "server/discover":
+      return rpcResult(id, {
+        resultType: "complete",
+        supportedVersions: ALL_SUPPORTED,
+        capabilities: {},
+        _meta: {
+          "io.modelcontextprotocol/serverInfo": { name: SERVER_NAME, version: "1.0.0", title: SERVER_TITLE },
+          // Same FAF context the card carries — discovery and protocol agree (#23).
+          [SERVER_NAME]: fafContext(host, nowISO),
+        },
+      });
+    case "ping":
+      return rpcResult(id, { resultType: "complete" });
+    default:
+      return rpcError(id ?? null, -32601, `Method not found: ${method}`, 404);
+  }
 }
 
 export default {
@@ -133,13 +178,16 @@ export default {
         return rpcError(null, -32700, "Parse error");
       }
       const { id, method, params } = msg || {};
+      if (method !== "initialize" && params?._meta?.[META_VERSION] !== undefined) {
+        return modernRequest(request, id, method, params, url.host, nowISO);
+      }
 
       switch (method) {
         case "initialize": {
           const asked = params?.protocolVersion;
-          const protocolVersion = SUPPORTED.includes(asked)
+          const protocolVersion = LEGACY_SUPPORTED.includes(asked)
             ? asked
-            : SUPPORTED[0];
+            : LEGACY_SUPPORTED[0];
           return rpcResult(id, {
             protocolVersion,
             capabilities: {},
