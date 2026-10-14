@@ -6,18 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-  serverCardValidator,
-  call,
-  rpc,
-  card,
-  init,
-  buildServerCard,
-  MEDIA_TYPE,
-  PROTO,
-  CARD_PATH,
-  ROOT,
-} from "./_helpers.mjs";
+import { serverCardValidator, call, rpc, card, init, buildServerCard, MEDIA_TYPE, PROTO, CARD_PATH, ROOT, modern } from "./_helpers.mjs";
 import { PROJECT_FAF } from "../src/projectfaf.js";
 
 test("Brake · _meta.faf is self-hosted (host-derived) — resolves on this origin", async () => {
@@ -57,8 +46,14 @@ test("Brake · honest-first: every advertised protocol is actually answered", as
   const advertised = (await card()).remotes[0].supportedProtocolVersions;
   assert.ok(advertised.length > 0);
   for (const v of advertised) {
-    const r = await init({ protocolVersion: v });
-    assert.equal(r.result.protocolVersion, v, `advertised ${v} must be answered`);
+    if (v >= "2026-07-28") {
+      // Per-request `_meta` era: answered by server/discover, which must list it.
+      const r = await call("/mcp", modern("server/discover", v)).then((x) => x.json());
+      assert.ok(r.result?.supportedVersions?.includes(v), `advertised ${v} must be answered by server/discover`);
+    } else {
+      const r = await init({ protocolVersion: v });
+      assert.equal(r.result.protocolVersion, v, `advertised ${v} must be answered`);
+    }
   }
 });
 

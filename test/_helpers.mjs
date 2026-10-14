@@ -56,6 +56,20 @@ export function rpc(method, params, id = 1) {
   };
 }
 
+/** A 2026-07-28 JSON-RPC POST: per-request `_meta` plus the required MCP headers. */
+export function modern(method, version = "2026-07-28", { headers = {}, id = 1, params = {} } = {}) {
+  return {
+    method: "POST",
+    headers: { "content-type": "application/json", "mcp-protocol-version": version, "mcp-method": method, ...headers },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id,
+      method,
+      params: { ...params, _meta: { "io.modelcontextprotocol/protocolVersion": version, ...(params._meta || {}) } },
+    }),
+  };
+}
+
 export const card = (host) => call(CARD_PATH, undefined, host).then((r) => r.json());
 export const catalog = (host) => call(CATALOG_PATH, undefined, host).then((r) => r.json());
 export const init = (params, host) =>
