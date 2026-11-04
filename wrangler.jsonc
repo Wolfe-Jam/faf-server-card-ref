@@ -6,5 +6,8 @@
   "observability": { "enabled": true },
   // Custom domain — the card derives its own host, so it self-describes at
   // context.faf.one (card → context.faf.one/mcp/server-card; remotes → /mcp).
-  "routes": [{ "pattern": "context.faf.one", "custom_domain": true }]
+  "routes": [{ "pattern": "context.faf.one", "custom_domain": true }],
+  // Workers Builds runs `npx wrangler preview` on PRs; wrangler 4.157+ requires
+  // this block. Empty is safe: the worker has no bindings or secrets to keep apart.
+  "previews": {}
 }
