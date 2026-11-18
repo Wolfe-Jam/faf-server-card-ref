@@ -131,7 +131,7 @@ function modernRequest(request, id, method, params, host, nowISO) {
 }
 
 export default {
-  async fetch(request, _env, _ctx) {
+  async fetch(request, env, _ctx) {
     const url = new URL(request.url);
     const nowISO = new Date().toISOString();
 
@@ -231,16 +231,36 @@ export default {
       return json(validationResult(card));
     }
 
-    // 4. Human-readable explainer (show the flow)
-    if (url.pathname === "/") {
+    // 4. Human-readable explainer (show the flow). At /card; also at / when
+    //    no page Worker is bound (local runs, tests, forks).
+    if (url.pathname === "/card" || (url.pathname === "/" && !env?.PAGE)) {
       return new Response(landing(`https://${url.host}`), {
         headers: { "content-type": "text/html; charset=utf-8", ...cors },
       });
     }
 
+    // 5. context.faf.one is shared with the repo-to-context page (Worker
+    //    context-faf-one, service binding PAGE). Every path the card does not
+    //    own goes there; the card's own paths above never do.
+    if (env?.PAGE && !isCardPath(url.pathname)) {
+      return env.PAGE.fetch(request);
+    }
+
     return json({ error: "not found" }, { status: 404 });
   },
 };
+
+/** Paths the card owns, answered here or 404 here, never handed to the page. */
+function isCardPath(pathname) {
+  return (
+    pathname === "/mcp" ||
+    pathname.startsWith("/mcp/") ||
+    pathname.startsWith("/.well-known/") ||
+    pathname === "/project.faf" ||
+    pathname === "/validate" ||
+    pathname === "/card"
+  );
+}
 
 function landing(base) {
   return `<!doctype html>
