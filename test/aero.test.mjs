@@ -71,3 +71,18 @@ test("Aero · card ETag is weak and stable across requests; If-None-Match gets 3
   const stale = await call(CARD_PATH, { headers: { "If-None-Match": 'W/"0000"' } });
   assert.equal(stale.status, 200);
 });
+
+test("Aero · the validator: an empty press asks for a card, never sends an empty request", async () => {
+  const html = await (await call("/")).text();
+  assert.match(html, /if\(!u&&!c\)\{o\.textContent='Paste a Server Card, or give its URL\.';return;\}/);
+});
+
+test("Aero · the validator: one click checks this site's own card", async () => {
+  const html = await (await call("/")).text();
+  assert.match(html, /or check this site's own card/);
+  assert.match(html, /location\.origin\+'\/mcp\/server-card'/);
+  // and that card validates against MCP's schema, the page's whole point
+  const res = await call("/validate", { method: "POST", headers: { "content-type": "application/json" }, body: await (await call("/mcp/server-card")).text() });
+  const out = await res.json();
+  assert.equal(out.conformant, true, JSON.stringify(out));
+});
