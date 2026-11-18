@@ -1,4 +1,12 @@
 format_version: 1.0.0
 project: faf-server-card-ref
 created: 2026-11-18T13:49:09.625Z
-test_history: []
+test_history:
+  - timestamp: 2026-11-18T13:49:09.672Z
+    result: FAILED
+    tests:
+      total: 59
+      passed: 59
+      failed: 0
+    trigger: github-actions
+last_updated: 2026-11-18T13:49:09.673Z
