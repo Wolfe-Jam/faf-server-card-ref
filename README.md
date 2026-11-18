@@ -21,6 +21,8 @@ npm test          # WJTTC: Brake · Engine · Aero (Tyres runs only against a li
 
 The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes, `test/live/`) are not in `npm test`: `WJTTC_TARGET=https://context.faf.one npm run test:tyres`, and without a target they fail, never skip.
 
+Every run on `main` prints a TAF test receipt to the `taf-receipts` branch (`.github/workflows/taf.yml`). It first waits until `https://context.faf.one/card/version` shows the commit under test (`npm run deploy` stamps it), then runs Tyres with the rest, so each receipt covers the live card.
+
 ## Receipts (after `npm run deploy`)
 
 ```bash

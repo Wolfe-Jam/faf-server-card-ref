@@ -15,7 +15,7 @@
     "snapshot": "node scripts/snapshot.mjs",
     "build:validator": "node scripts/build-validator.mjs",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --var GIT_SHA:${WORKERS_CI_COMMIT_SHA:-local}"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
