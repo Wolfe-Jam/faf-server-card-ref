@@ -63,7 +63,7 @@ curl -s https://context.faf.one/mcp -H 'content-type: application/json' \
 
 ```
 src/card.js          card + catalog + the FAF context block (source of truth)
-src/index.js         the Worker (catalog + card + minimal MCP + landing)
+src/index.js         the Worker (catalog + card + minimal MCP + explainer at /card; other paths go to the context.faf.one page when bound)
 src/projectfaf.js    the served project.faf string (drift-guarded vs ./project.faf)
 project.faf          the repo's own FAF context (app_type: server-card, TROPHY 100%)
 schema/              MCP's own server-card.schema.json (vendored)
