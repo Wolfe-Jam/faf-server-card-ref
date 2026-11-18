@@ -1,19 +1,19 @@
 /**
  * TYRES — live probes against a deployed instance.
  *
- * Signal-Integrity discipline: these GREY-SKIP when no target is set. A missing
- * deploy is not a code defect, so it must never go red (dead-signal prevention).
+ * Not in `npm test`: a test is added where it can run, never skipped. Without a
+ * target this file fails, so a receipt never carries a skip.
  * Run live:  WJTTC_TARGET=https://context.faf.one npm run test:tyres
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { serverCardValidator, MEDIA_TYPE, PROTO, CARD_PATH } from "./_helpers.mjs";
+import { serverCardValidator, MEDIA_TYPE, PROTO, CARD_PATH } from "../_helpers.mjs";
 
 const TARGET = process.env.WJTTC_TARGET?.replace(/\/$/, "");
-const skip = TARGET ? false : "set WJTTC_TARGET=https://<host> to run live probes";
+if (!TARGET) throw new Error("Tyres are live probes: set WJTTC_TARGET=https://<host>");
 const validate = serverCardValidator();
 
-test("Tyres · live card responds + conforms to MCP schema", { skip }, async () => {
+test("Tyres · live card responds + conforms to MCP schema", async () => {
   const res = await fetch(`${TARGET}${CARD_PATH}`);
   assert.equal(res.status, 200);
   const body = await res.json();
@@ -21,7 +21,7 @@ test("Tyres · live card responds + conforms to MCP schema", { skip }, async () 
   assert.equal(body._meta["one.faf/context"].mediaType, MEDIA_TYPE);
 });
 
-test("Tyres · live /mcp initialize negotiates + carries context", { skip }, async () => {
+test("Tyres · live /mcp initialize negotiates + carries context", async () => {
   const res = await fetch(`${TARGET}/mcp`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -38,7 +38,7 @@ test("Tyres · live /mcp initialize negotiates + carries context", { skip }, asy
   assert.equal(body.result._meta["one.faf/context"].mediaType, MEDIA_TYPE);
 });
 
-test("Tyres · live /validate (POST the live card) → conformant", { skip }, async () => {
+test("Tyres · live /validate (POST the live card) → conformant", async () => {
   // POST the card (not ?url=self — a worker fetching its own custom domain loops/522).
   const liveCard = await (await fetch(`${TARGET}${CARD_PATH}`)).json();
   const r = await fetch(`${TARGET}/validate`, {
@@ -51,7 +51,7 @@ test("Tyres · live /validate (POST the live card) → conformant", { skip }, as
   assert.deepEqual(j.errors, []);
 });
 
-test("Tyres · live remote URL matches the deployed host", { skip }, async () => {
+test("Tyres · live remote URL matches the deployed host", async () => {
   const host = new URL(TARGET).host;
   const body = await (await fetch(`${TARGET}${CARD_PATH}`)).json();
   assert.equal(body.remotes[0].url, `https://${host}/mcp`);
