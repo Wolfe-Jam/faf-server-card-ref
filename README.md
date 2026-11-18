@@ -16,10 +16,10 @@ This is a **show-the-flow** artifact, not a pitch. It demonstrates — with rece
 
 ```bash
 npm install
-npm test          # WJTTC: Brake · Engine · Aero · Tyres
+npm test          # WJTTC: Brake · Engine · Aero (Tyres runs only against a live Worker)
 ```
 
-The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes) grey-skip unless `WJTTC_TARGET` is set.
+The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes, `test/live/`) are not in `npm test`: `WJTTC_TARGET=https://context.faf.one npm run test:tyres`, and without a target they fail, never skip.
 
 ## Receipts (after `npm run deploy`)
 
@@ -67,7 +67,7 @@ src/index.js         the Worker (catalog + card + minimal MCP + explainer at /ca
 src/projectfaf.js    the served project.faf string (drift-guarded vs ./project.faf)
 project.faf          the repo's own FAF context (app_type: server-card, TROPHY 100%)
 schema/              MCP's own server-card.schema.json (vendored)
-test/                WJTTC suite — Brake / Engine / Aero / Tyres
+test/                WJTTC suite — Brake / Engine / Aero; test/live/ Tyres
 examples/            generated conformant snapshot
 ```
 
