@@ -240,7 +240,7 @@ export default {
     }
 
     // 5. context.faf.one is shared with the repo-to-context page (Worker
-    //    context-faf-one, service binding PAGE). Every path the card does not
+    //    context, service binding PAGE). Every path the card does not
     //    own goes there; the card's own paths above never do.
     if (env?.PAGE && !isCardPath(url.pathname)) {
       return env.PAGE.fetch(request);
