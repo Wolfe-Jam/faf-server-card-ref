@@ -231,6 +231,12 @@ export default {
       return json(validationResult(card));
     }
 
+    // 3c. Which commit is live (stamped by `npm run deploy`; null when run
+    //     locally). The TAF receipt on main waits for it before live Tyres.
+    if (url.pathname === "/card/version") {
+      return json({ commit: env?.GIT_SHA || null }, { headers: { "cache-control": "no-store" } });
+    }
+
     // 4. Human-readable explainer (show the flow). At /card; also at / when
     //    no page Worker is bound (local runs, tests, forks).
     if (url.pathname === "/card" || (url.pathname === "/" && !env?.PAGE)) {
@@ -258,7 +264,8 @@ function isCardPath(pathname) {
     pathname.startsWith("/.well-known/") ||
     pathname === "/project.faf" ||
     pathname === "/validate" ||
-    pathname === "/card"
+    pathname === "/card" ||
+    pathname === "/card/version"
   );
 }
 

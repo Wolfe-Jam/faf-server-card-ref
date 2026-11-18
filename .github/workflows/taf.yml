@@ -1,0 +1,57 @@
+name: TAF Receipts
+# Prints a Test Receipt (.taf) for every run on main: proof over time.
+# Written by `faf taf setup`; v2.7.0, the live wait and Tyres added by hand. Docs: https://github.com/Wolfe-Jam/faf-taf-git
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  taf:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write              # lets the action save receipts
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+      - run: npm ci
+      # On main, the receipt also covers the live site: wait until
+      # the card Worker runs this commit (Workers Builds deploys it in
+      # parallel), then run Tyres with the rest. On PRs: npm test only.
+      - name: Wait for the card on context.faf.one to run this commit
+        id: live
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          for _ in $(seq 1 40); do
+            live=$(curl -s https://context.faf.one/card/version | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).commit||"")}catch{console.log("")}})')
+            [ "$live" = "$GITHUB_SHA" ] && { echo "live on $GITHUB_SHA"; exit 0; }
+            sleep 15
+          done
+          echo "the card on context.faf.one is not running $GITHUB_SHA after 10 minutes (live: ${live:-unknown})"; exit 1
+      # Your test command, with a JUnit report added (faf-taf-git reads it).
+      - name: Run tests
+        id: tests
+        continue-on-error: true    # keep going, so a failed run still gets a receipt
+        env:
+          WJTTC_TARGET: https://context.faf.one
+          LIVE: ${{ steps.live.outcome }}
+        run: |
+          set -o pipefail
+          SUITE="test"; [ "$LIVE" = "success" ] && SUITE="test:all"
+          [ "$LIVE" = "failure" ] && echo "::error::the card deploy did not reach context.faf.one; the receipt records a failure"
+          NODE_OPTIONS="--test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=report.xml" npm run "$SUITE"
+          [ "$LIVE" != "failure" ]
+      - name: Print the receipt
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: Wolfe-Jam/faf-taf-git@v2.7.0
+        with:
+          test-output-file: report.xml
+          target-branch: taf-receipts
+          test-outcome: ${{ steps.tests.outcome }}
+      - name: Fail the job if the tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1

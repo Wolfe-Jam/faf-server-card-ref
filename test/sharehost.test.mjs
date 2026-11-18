@@ -26,7 +26,7 @@ test("Share · / and the page's routes go to the page", async () => {
 
 test("Share · the card's own paths never go to the page", async () => {
   seen.length = 0;
-  for (const p of [CARD_PATH, CARD_PATH_LEGACY, CATALOG_PATH, "/.well-known/project.faf", "/project.faf", "/validate", "/card"]) {
+  for (const p of [CARD_PATH, CARD_PATH_LEGACY, CATALOG_PATH, "/.well-known/project.faf", "/project.faf", "/validate", "/card", "/card/version"]) {
     const res = await callBound(p);
     assert.notEqual(res.headers.get("x-from"), "page", p);
     assert.equal(res.status, 200, p);
@@ -51,4 +51,9 @@ test("Share · no binding = the card serves / as before", async () => {
   assert.match(res.headers.get("content-type"), /text\/html/);
   const nf = await worker.fetch(new Request("https://context.faf.one/anything-else"), {}, {});
   assert.equal(nf.status, 404);
+});
+
+test("Share · /card/version names the live commit, null when not stamped", async () => {
+  assert.deepEqual(await (await worker.fetch(new Request("https://context.faf.one/card/version"), { GIT_SHA: "abc123" }, {})).json(), { commit: "abc123" });
+  assert.deepEqual(await (await callBound("/card/version")).json(), { commit: null });
 });
