@@ -279,13 +279,15 @@ curl -s ${base}/mcp -H 'content-type: application/json' \\
 <p>Paste a card, or give its URL — checked against MCP's published <code>server-card.schema.json</code>.</p>
 <textarea id="c" rows="5" placeholder='{"$schema":"https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json","name":"ns/name","version":"1.0.0","description":"..."}'></textarea>
 <input id="u" placeholder="…or a URL, e.g. https://context.faf.one/mcp/server-card">
-<button onclick="v()">Validate</button>
+<button onclick="v()">Validate</button> <a href="#" id="own" onclick="own();return false">or check this site's own card</a>
 <pre id="o"></pre>
 <script>
 async function v(){var o=document.getElementById('o');o.textContent='checking…';
 var u=document.getElementById('u').value.trim(),c=document.getElementById('c').value.trim();
+if(!u&&!c){o.textContent='Paste a Server Card, or give its URL.';return;}
 try{var r=u?await fetch('/validate?url='+encodeURIComponent(u)):await fetch('/validate',{method:'POST',headers:{'content-type':'application/json'},body:c});
 o.textContent=JSON.stringify(await r.json(),null,2);}catch(e){o.textContent='error: '+e}}
+function own(){document.getElementById('c').value='';document.getElementById('u').value=location.origin+'/mcp/server-card';v();}
 </script>
 <p class="r">Source: <a href="https://github.com/Wolfe-Jam/faf-server-card-ref">github.com/Wolfe-Jam/faf-server-card-ref</a> · MIT · also: <code>curl -s context.faf.one/validate?url=&lt;your-card&gt;</code></p>
 </body></html>`;
