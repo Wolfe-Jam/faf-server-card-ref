@@ -4,7 +4,7 @@
 
 One Cloudflare Worker is, simultaneously:
 
-1. **An AI Catalog** (discovery entrypoint, [AI Catalog v0.9.0](https://github.com/Agent-Card/ai-catalog)) at `/.well-known/ai-catalog.json`, served as `application/ai-catalog+json` (and unchanged at `/.well-known/mcp/catalog.json`). Its entry is `urn:air:faf.one:context-mcp`; the id published before v0.9, `urn:air:faf.one:mcp:context`, is kept under `one.faf.former-identifiers`,
+1. **An AI Catalog** (discovery entrypoint, [AI Catalog v0.9.0](https://github.com/Agent-Card/ai-catalog)) at `/.well-known/ai-catalog.json`, served as `application/ai-catalog+json` (and unchanged at `/.well-known/mcp/catalog.json`). Its entry is `urn:air:faf.one:context-mcp`; the ids it had before v0.9 (`urn:air:faf.one:mcp:context` here, `urn:air:faf.one:mcp:context-server` in faf.one's catalog) are kept under `one.faf.former-identifiers`,
 2. **A conformant MCP Server Card** at `/mcp/server-card` — the reserved default location ([#22](https://github.com/modelcontextprotocol/experimental-ext-server-card/pull/22)), served as `application/mcp-server-card+json`; `/.well-known/mcp/server-card` kept for back-compat, and
 3. **A live minimal MCP endpoint** at `/mcp` (the protocol layer),
 
