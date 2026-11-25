@@ -36,12 +36,22 @@ test("Engine · /project.faf short path also serves", async () => {
 
 test("Engine · Catalog at /.well-known/mcp/catalog.json → entry points at the card", async () => {
   const c = await catalog("tenant.example.dev");
-  assert.equal(c.specVersion, "draft");
+  assert.equal(c.specVersion, "0.9"); // AI Catalog v0.9.0
   const e = c.entries[0];
-  assert.equal(e.identifier, "urn:air:faf.one:mcp:context"); // discovery.md urn:air:{publisher}:{ns}:{name}
+  // v0.9 reads urn:air:{publisher}:{name}[:{kind}]; one segment ({name}-{kind}) reads the same before it
+  assert.equal(e.identifier, "urn:air:faf.one:context-mcp");
+  assert.deepEqual(e.extensions, { "one.faf.former-identifiers": ["urn:air:faf.one:mcp:context"] });
   assert.equal(e.type, CARD_MEDIA); // ADR 0014: CatalogEntry field renamed mediaType -> type
   assert.equal(e.displayName, undefined); // #39: displayName dropped from Catalog entries
   assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");
+});
+
+test("Engine · AI Catalog at /.well-known/ai-catalog.json: its media type, the same catalog", async () => {
+  const r = await call("/.well-known/ai-catalog.json", undefined, "tenant.example.dev");
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get("content-type").split(";")[0], "application/ai-catalog+json");
+  assert.equal(r.headers.get("access-control-allow-origin"), "*");
+  assert.deepEqual(await r.json(), await catalog("tenant.example.dev"));
 });
 
 test("Engine · POST /validate — conformant card → conformant:true, no errors", async () => {

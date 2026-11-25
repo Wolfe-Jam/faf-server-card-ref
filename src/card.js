@@ -56,28 +56,35 @@ export const SERVER_NAME = "one.faf/context"; // reverse-DNS name + _meta key
 export const SERVER_TITLE = "FAF Context Endpoint";
 export const CARD_MEDIA_TYPE = "application/mcp-server-card+json";
 
+export const AI_CATALOG_MEDIA_TYPE = "application/ai-catalog+json";
+
 /**
- * Build the MCP Catalog (discovery entrypoint) served at
- * `/.well-known/mcp/catalog.json` (post experimental-ext-server-card#22).
+ * Build the AI Catalog (discovery entrypoint), AI Catalog v0.9.0. Served at
+ * `/.well-known/ai-catalog.json` (the well-known path discovery.md names) and,
+ * unchanged, at `/.well-known/mcp/catalog.json` (post experimental-ext-server-card#22).
  * The Catalog is the entrypoint; each entry points at where the card lives.
  * @param {string} host
  */
 export function buildCatalog(host) {
-  // discovery.md (experimental-ext-server-card) requires the AI Catalog
-  // urn:air:{publisher}:{namespace}:{name} convention (ADR 0015): publisher = the
-  // forward-DNS of the card name's reverse-DNS prefix; name = the segment after "/".
+  // AI Catalog v0.9 reads urn:air:{publisher}:{name}[:{kind}] (ADR-0030); the drafts
+  // before it read the same shape as {namespace}:{name} (ADR-0015). One segment after
+  // the publisher, {name}-{kind}, reads the same in both. publisher = the forward-DNS
+  // of the card name's reverse-DNS prefix; name = the segment after "/".
   const [rev, suffix] = SERVER_NAME.split("/"); // "one.faf", "context"
   const publisher = rev.split(".").reverse().join("."); // "faf.one"
   return {
-    specVersion: "draft",
+    specVersion: "0.9",
     entries: [
       {
-        identifier: `urn:air:${publisher}:mcp:${suffix}`, // urn:air:faf.one:mcp:context
+        identifier: `urn:air:${publisher}:${suffix}-mcp`, // urn:air:faf.one:context-mcp
         // ADR 0014 (experimental-ext-server-card#32, merged 2026-07-13): CatalogEntry
         // field renamed mediaType -> type. #39 (same day) dropped displayName.
         type: CARD_MEDIA_TYPE,
         // Reserved default location: <streamable-http-url>/server-card.
         url: `https://${host}/mcp/server-card`,
+        // The id published before v0.9, kept in a namespaced extension (the spec
+        // defines no migration mechanism; § Catalog Projection keeps replaced ids so).
+        extensions: { [`${rev}.former-identifiers`]: [`urn:air:${publisher}:mcp:${suffix}`] },
       },
     ],
   };
