@@ -1,6 +1,7 @@
 /**
  * faf-server-card-ref — a Cloudflare Worker that is, in one file:
- *   1. an MCP Catalog (discovery entrypoint) at /.well-known/mcp/catalog.json
+ *   1. an AI Catalog (discovery entrypoint, v0.9) at /.well-known/ai-catalog.json
+ *      and /.well-known/mcp/catalog.json
  *   2. a conformant MCP Server Card at /mcp/server-card (the reserved default,
  *      post experimental-ext-server-card#22) + /.well-known/mcp/server-card (back-compat)
  *   3. a live minimal MCP endpoint at /mcp
@@ -11,7 +12,7 @@
  * extension. The card is validated against MCP's own published schema (npm test).
  */
 
-import {
+import { AI_CATALOG_MEDIA_TYPE,
   buildServerCard,
   buildCatalog,
   fafContext,
@@ -139,7 +140,13 @@ export default {
       return new Response(null, { headers: cors });
     }
 
-    // 1. The Catalog — discovery entrypoint (#22). Points at the card's URL.
+    // 1. The Catalog — discovery entrypoint. Points at the card's URL. The AI Catalog
+    //    well-known path, with its media type; the #22 path stays as it was.
+    if (url.pathname === "/.well-known/ai-catalog.json") {
+      return json(buildCatalog(url.host), {
+        headers: { "content-type": `${AI_CATALOG_MEDIA_TYPE}; charset=utf-8`, "cache-control": "public, max-age=300" },
+      });
+    }
     if (url.pathname === "/.well-known/mcp/catalog.json") {
       return json(buildCatalog(url.host), {
         headers: { "cache-control": "public, max-age=300" },
@@ -291,7 +298,7 @@ minimal MCP endpoint that says the same thing. Discovery and protocol agree (#23
 <p>The card validates against MCP's own published schema (JSON Schema 2020-12). Conformance is proven, not asserted.</p>
 <h2>Receipts</h2>
 <pre># Catalog (discovery entrypoint)
-curl ${base}/.well-known/mcp/catalog.json
+curl ${base}/.well-known/ai-catalog.json
 
 # Server Card — reserved default location (#22), application/mcp-server-card+json
 curl -H 'accept: application/mcp-server-card+json' ${base}/mcp/server-card

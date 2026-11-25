@@ -4,7 +4,7 @@
 
 One Cloudflare Worker is, simultaneously:
 
-1. **An MCP Catalog** (discovery entrypoint) at `/.well-known/mcp/catalog.json`,
+1. **An AI Catalog** (discovery entrypoint, [AI Catalog v0.9.0](https://github.com/Agent-Card/ai-catalog)) at `/.well-known/ai-catalog.json`, served as `application/ai-catalog+json` (and unchanged at `/.well-known/mcp/catalog.json`). Its entry is `urn:air:faf.one:context-mcp`; the id published before v0.9, `urn:air:faf.one:mcp:context`, is kept under `one.faf.former-identifiers`,
 2. **A conformant MCP Server Card** at `/mcp/server-card` — the reserved default location ([#22](https://github.com/modelcontextprotocol/experimental-ext-server-card/pull/22)), served as `application/mcp-server-card+json`; `/.well-known/mcp/server-card` kept for back-compat, and
 3. **A live minimal MCP endpoint** at `/mcp` (the protocol layer),
 
@@ -19,15 +19,15 @@ npm install
 npm test          # WJTTC: Brake · Engine · Aero (Tyres runs only against a live Worker)
 ```
 
-The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from `experimental-ext-server-card`) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes, `test/live/`) are not in `npm test`: `WJTTC_TARGET=https://context.faf.one npm run test:tyres`, and without a target they fail, never skip.
+The suite validates the card against **MCP's own published schema** (`schema/server-card.schema.json`, JSON Schema 2020-12, vendored from [`ext-server-card@28db12c9`](https://github.com/modelcontextprotocol/ext-server-card/tree/28db12c9b4a379489d46e49bf1bd4a991f05c9b7), the version `mcp-server-card-check` pins) and drives the Worker's `fetch` handler directly. Green = a conformant Server Card. Tyres (live probes, `test/live/`) are not in `npm test`: `WJTTC_TARGET=https://context.faf.one npm run test:tyres`, and without a target they fail, never skip.
 
 Every run on `main` prints a TAF test receipt to the `taf-receipts` branch (`.github/workflows/taf.yml`). It first waits until `https://context.faf.one/card/version` shows the commit under test (`npm run deploy` stamps it), then runs Tyres with the rest, so each receipt covers the live card.
 
 ## Receipts (after `npm run deploy`)
 
 ```bash
-# Discovery — the Catalog entrypoint
-curl https://context.faf.one/.well-known/mcp/catalog.json
+# Discovery — the AI Catalog entrypoint (application/ai-catalog+json)
+curl https://context.faf.one/.well-known/ai-catalog.json
 
 # The Server Card — reserved default location, application/mcp-server-card+json
 curl -H 'accept: application/mcp-server-card+json' https://context.faf.one/mcp/server-card
