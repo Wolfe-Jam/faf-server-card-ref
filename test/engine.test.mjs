@@ -40,7 +40,7 @@ test("Engine · Catalog at /.well-known/mcp/catalog.json → entry points at the
   const e = c.entries[0];
   // v0.9 reads urn:air:{publisher}:{name}[:{kind}]; one segment ({name}-{kind}) reads the same before it
   assert.equal(e.identifier, "urn:air:faf.one:context-mcp");
-  assert.deepEqual(e.extensions, { "one.faf.former-identifiers": ["urn:air:faf.one:mcp:context"] });
+  assert.deepEqual(e.extensions, { "one.faf.former-identifiers": ["urn:air:faf.one:mcp:context", "urn:air:faf.one:mcp:context-server"] });
   assert.equal(e.type, CARD_MEDIA); // ADR 0014: CatalogEntry field renamed mediaType -> type
   assert.equal(e.displayName, undefined); // #39: displayName dropped from Catalog entries
   assert.equal(e.url, "https://tenant.example.dev/mcp/server-card");

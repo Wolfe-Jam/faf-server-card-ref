@@ -86,7 +86,8 @@ export function buildCatalog(host) {
         // The id published before v0.9, kept in a namespaced extension. The spec defines
         // no migration mechanism; this borrows the pattern § Catalog Projection gives
         // operators for replaced source identifiers (no meaning of equivalence).
-        extensions: { [`${rev}.former-identifiers`]: [`urn:air:${publisher}:mcp:${suffix}`] },
+        // Both ids this card had: mcp:context here, mcp:context-server in faf.one's catalog.
+        extensions: { [`${rev}.former-identifiers`]: [`urn:air:${publisher}:mcp:${suffix}`, `urn:air:${publisher}:mcp:${suffix}-server`] },
       },
     ],
   };
