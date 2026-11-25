@@ -68,7 +68,8 @@ export const AI_CATALOG_MEDIA_TYPE = "application/ai-catalog+json";
 export function buildCatalog(host) {
   // AI Catalog v0.9 reads urn:air:{publisher}:{name}[:{kind}] (ADR-0030); the drafts
   // before it read the same shape as {namespace}:{name} (ADR-0015). One segment after
-  // the publisher, {name}-{kind}, reads the same in both. publisher = the forward-DNS
+  // the publisher, {name}-{kind}, can't be read the wrong way round: v0.9 reads it as a
+  // name with no kind. publisher = the forward-DNS
   // of the card name's reverse-DNS prefix; name = the segment after "/".
   const [rev, suffix] = SERVER_NAME.split("/"); // "one.faf", "context"
   const publisher = rev.split(".").reverse().join("."); // "faf.one"
@@ -82,8 +83,9 @@ export function buildCatalog(host) {
         type: CARD_MEDIA_TYPE,
         // Reserved default location: <streamable-http-url>/server-card.
         url: `https://${host}/mcp/server-card`,
-        // The id published before v0.9, kept in a namespaced extension (the spec
-        // defines no migration mechanism; § Catalog Projection keeps replaced ids so).
+        // The id published before v0.9, kept in a namespaced extension. The spec defines
+        // no migration mechanism; this borrows the pattern § Catalog Projection gives
+        // operators for replaced source identifiers (no meaning of equivalence).
         extensions: { [`${rev}.former-identifiers`]: [`urn:air:${publisher}:mcp:${suffix}`] },
       },
     ],
